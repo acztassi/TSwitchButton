@@ -22,7 +22,7 @@ TSwitchButton ButtonTeste(1, ButtonEvent);
 ```
 Arguments:
 - ButtonEvent - Is a pointer to an event which is invoked on each interaction. 
-- "1" - Is te ID of button, used to identify which button is pressed, in case of reuse events for multiple buttons.
+- "1" - Is the ID of button, used to identify which button is pressed, in case of reuse events for multiple buttons.
 
 ## How to start?
 It is needed to setup main event! 
