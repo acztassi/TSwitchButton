@@ -154,5 +154,7 @@ void loop()
 ```
 The refresh function requires two arguments. The first one is the button state, in where true means pressed and false means unpressed. The second one is the atual time based on current millis() funcion. Internally the will be ignored more than one action at same time to avoid processing.
 
+### Important
+To have a great perfomance, do not use either delays nor long process function at same task. Prefer to use the buttons task separatedly.
 
 
