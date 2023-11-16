@@ -23,6 +23,10 @@ Arguments:
 - ButtonEvent - Is a pointer to an event which is invoked on each interaction. 
 - "1" - Is te ID of button, used to identify which button is pressed, in case of reuse events for multiple buttons.
 
+## How to start?
+It is needed to setup main event! 
+
+
 ### The main event
 
 ```
@@ -73,7 +77,7 @@ void ButtonCallback (int ASwitchId, TSwitchCommands ACommands)
 ```
 In where "int ASwitchId" is the button ID, and the "TSwitchCommands ACommands" is the same as above.
 
-Here a sample of use:
+Here a sample of how to use callback use:
 
 
 ```C++
@@ -137,6 +141,17 @@ void ButtonEvent(int ASwitchId, TSwitchCommands ACommands, TSwitchCallback &ACal
 
 };
 ```
+
+### The second step:
+Make the button work!
+
+```C++
+void loop()
+{
+  ButtonTeste.Refresh(digitalRead(8), millis());  
+}
+```
+The refresh function requires two arguments. The first one is the button state, in where true means pressed and false means unpressed. The second one is the atual time based on current millis() funcion. Internally the will be ignored more than one action at same time to avoid processing.
 
 
 
