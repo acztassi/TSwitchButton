@@ -90,7 +90,7 @@ void ButtonEvent(int ASwitchId, TSwitchCommands ACommands, TSwitchCallback &ACal
     Serial.println("dblclick"); 
     ACallback = nullptr; //does not accept new command ... the command already is executed and does not support another stage
   }
-  else if (ACommands[0] == cPress && ACommands[1] == cNone) // a single long click
+  else if (ACommands[0].Kind == cPress && ACommands[1].Kind == cNone) // a single long click
   { 
     Serial.println("long pressing for " + String(ACommands.AtualItem().PressedTime)); 
     ACallback =
