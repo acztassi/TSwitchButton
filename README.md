@@ -17,6 +17,7 @@ Library for controlling muliple click and long press in Arduino and ESP32
 ### The main class.
 
 ```
+#include <SwitchButton.h>
 TSwitchButton ButtonTeste(1, ButtonEvent);
 ```
 Arguments:
