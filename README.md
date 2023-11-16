@@ -44,26 +44,13 @@ Only returns the Id of identification of the button.
 It works like an array and returns all fired commands since the action had started.
 Some methods are avaiables:
   
-##### Count() 
-Count all fired commands.
-
-##### Item(int AIndex) 
-Return informations about each item. It stores the kind of command and the time, in case long click.
-
-##### AtualItem() 
-Return the last fired item. It stores the kind of command and the time, in case long click.
-
-##### IsSigleClick() 
-Check if it is a single click.
-
-##### IsDoubleClick()
-Check if it is a double click.
-
-##### IsSinglePress()
-Check if it is a single long click.
-
-##### IsClickAndPress() 
-Check if it is a single click followed by a single long press.
+  - Count() -- Count all fired commands.
+  - Item(int AIndex) -- Return informations about each item. It stores the kind of command and the time, in case long click.
+  - AtualItem() -- Return the last fired item. It stores the kind of command and the time, in case long click.
+  - IsSigleClick() -- Check if it is a single click.
+  - IsDoubleClick() -- Check if it is a double click.
+  - IsSinglePress() -- Check if it is a single long click.
+  - IsClickAndPress() -- Check if it is a single click followed by a single long press.
 
 
 #### Third Argument: "TSwitchCallback &ACallback"
