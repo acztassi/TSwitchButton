@@ -25,7 +25,7 @@
 struct TSwitchCommand;
 class TSwitchCommands;
 
-enum TSwitchCommandKind {cNone, cClick, cPress};
+enum TSwitchCommandKind {cNone, cClick, cLongClick};
 enum TSwitchEventTime {tDebounce, tAcceptClick, tlongPress, tTimedOut};
 typedef void (*TSwitchCallback)(int ASwitchId, TSwitchCommands ACommands);  //(void*);
 typedef void (*TSwitchEvent)(int ASwitchId, TSwitchCommands ACommands, TSwitchCallback &ACallback);
@@ -47,8 +47,8 @@ class TSwitchCommands {
     TSwitchCommand operator [](int AIndex);
     bool IsSigleClick();
     bool IsDoubleClick();
-    bool IsSinglePress();
-    bool IsClickAndPress();
+    bool IsLongClick();
+    bool IsClickAndLongClick();
 };
 
 class TSwitchCommandsAccess : public TSwitchCommands {
@@ -68,28 +68,28 @@ class TSwitchButton {
     unsigned long FBeginClickTime;
     unsigned long FEndClickTime;
     unsigned long FPressedTime;
-    unsigned long FBeginLongPressTime;
+    unsigned long FBeginLongClickTime;
     unsigned long FTimeLastFinishedCall = 0;
-    int FLongPressCurrentTime = -1;
-    bool FIsPressing = false;
-    bool FIsOnLongPress = false;
-    int FLongPressMaxTime = 5000;
+    bool FIsClicking = false;
+    bool FIsOnLongClick = false;
+    unsigned long FLongClickMaxTime;    
+    bool FFireEventDuringLongClick;
 
     void EndCommand(bool AFireProcedure);
-    void RunCommand(TSwitchCommandKind ACommand, int APressedTime) ;
-    void BeginPress();
-    void EndPress();
-    void LongPress();
-    void Pressing();
+    void RunCommand(TSwitchCommandKind ACommand, int AClickingTime) ;
+    void BeginClick();
+    void EndClick();
+    void LongClick();
+    void Clicking();
     void Idle();
     void RefreshPressedTime();
-    void SetLongPressState(bool AInLongPress);
+    void SetLongClickState(bool AInLongClick);
     bool IsBetweenCalls();
     bool IsOnDebounceTime(unsigned long &ATimeToCheck, unsigned long &ATimeToClear);    
     TSwitchEventTime EventTime(unsigned long AElapsedTime, unsigned int ATimeOutLimit);
 
   public: 
-    TSwitchButton(int ASwitchId, TSwitchEvent ASwitchEvent, int ALongPressMaxTime = 5000);
+    TSwitchButton(int ASwitchId, TSwitchEvent ASwitchEvent, unsigned long ALongClickMaxTime = 5000, bool AFireEventDuringLongClick = true);
     void Refresh(bool AState, unsigned long ACurrentMillis);    
 };
 
