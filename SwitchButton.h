@@ -40,6 +40,7 @@ struct TSwitchCommand{
 class TSwitchCommands { 
   protected:
     TSwitchCommand FCommands[C_MaxCommands];
+    int FLastIndex = 0;
   public:
     int Count();
     TSwitchCommand Item(int AIndex);
