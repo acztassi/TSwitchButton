@@ -17,36 +17,22 @@
 /* -------------------- IMPLEMENTATION ------------------------- */
 /* -------------------- TSwitchCommands ------------------------ */
 
-int TSwitchCommands::Count() { 
-    int i;
-    for (i = 0; i < C_MaxCommands; i++) 
-    { 
-        if (FCommands[i].Kind == cNone) 
-        { 
-        return i; 
-        break; 
-        } 
-    };
-    return 20;
+int TSwitchCommands::Count() {
+    return FLastIndex + 1;
 };
 
 TSwitchCommand TSwitchCommands::Item(int AIndex)  {
-    return FCommands[AIndex];
+    if (AIndex >= 0 && AIndex < C_MaxCommands)
+        return FCommands[AIndex];    
+    else
+        return TSwitchCommand();
 };
 
 TSwitchCommand TSwitchCommands::AtualItem() {
-    for (int i = (C_MaxCommands - 1); i >= 0; i--) 
-    { 
-        if (FCommands[i].Kind != cNone) 
-        { 
-            return FCommands[i]; 
-            break; 
-        } 
-    };
-    TSwitchCommand CelarReturn;
-    CelarReturn.Kind = cNone;
-    CelarReturn.PressedTime = 0;
-    return CelarReturn;
+    if (FLastIndex < (C_MaxCommands - 1))
+        return FCommands[FLastIndex];
+    else 
+        return TSwitchCommand();
 };
 
 TSwitchCommand TSwitchCommands::operator [](int AIndex)   {
@@ -74,14 +60,11 @@ bool TSwitchCommands::IsClickAndLongClick() {
 /* -------------------- class TSwitchButtonAccess ------------------------ */
 
 void TSwitchCommandsAccess::Add(TSwitchCommandKind ACommand, int APressedTime) { 
-    for (int i = 0; i < C_MaxCommands; i++) 
-    {        
-        if (FCommands[i].Kind == cNone) 
-        {
-            FCommands[i].Kind = ACommand;
-            FCommands[i].PressedTime = APressedTime; 
-            break;
-        };
+    if (FLastIndex < (C_MaxCommands - 1))
+    {
+        FLastIndex++;
+        FCommands[FLastIndex].Kind = ACommand;
+        FCommands[FLastIndex].PressedTime = APressedTime; 
     };
 };
 
@@ -91,16 +74,13 @@ void TSwitchCommandsAccess::Clear(){
         FCommands[i].Kind = cNone; 
         FCommands[i].PressedTime = 0; 
     };
+    FLastIndex = -1;
 };
 
 void TSwitchCommandsAccess::SetPressedTime(int APressedTime) {
-    for (int i = (C_MaxCommands - 1); i >= 0; i--) 
+    if (FLastIndex > -1)
     { 
-        if (FCommands[i].Kind != cNone) 
-        { 
-            FCommands[i].PressedTime = APressedTime; 
-            break; 
-        } 
+        FCommands[FLastIndex].PressedTime = APressedTime; 
     };
 };
 
@@ -114,9 +94,8 @@ void TSwitchButton::EndCommand(bool AFireProcedure) {
     if (FCommands.Count() > 0)
     {        
         if (AFireProcedure && FCallback)
-        {
             this -> FCallback(FSwitchID, FCommands);
-        };
+        
         FCommands.Clear();  
         this -> FCallback = nullptr;
         FBeginClickTime = 0;
@@ -127,30 +106,28 @@ void TSwitchButton::EndCommand(bool AFireProcedure) {
 };
 
 void TSwitchButton::RunCommand(TSwitchCommandKind ACommand, int AClickingTime) {
-    if (AClickingTime == 0 || !FFireEventDuringLongClick) 
-    { 
-        FCommands.Add(ACommand, AClickingTime); Serial.println("add"+String(AClickingTime));
-    } else {
-        FCommands.SetPressedTime(AClickingTime); Serial.println("set"+String(AClickingTime));
-    }
+    if (AClickingTime == 0 || !FFireEventDuringLongClick)     
+        FCommands.Add(ACommand, AClickingTime); 
+    else 
+        FCommands.SetPressedTime(AClickingTime);    
     
     this -> FCallback = nullptr;
     this -> FSwitchEvent(FSwitchID, FCommands, FCallback);
     
     if (!FCallback) //case there is not callback, the command already had finished
-    { this -> EndCommand(false);  };
+        this -> EndCommand(false); 
 };
 
 void TSwitchButton::BeginClick() {
     if (IsOnDebounceTime(FBeginClickTime, FEndClickTime)) 
-    { return; };
+        return; 
     FIsClicking = true;
     FEndClickTime = 0;
 };
 
 void TSwitchButton::EndClick() {
     if (IsOnDebounceTime(FEndClickTime, FBeginClickTime)) 
-    { return; };
+        return;
 
     FIsClicking = false;
 
@@ -215,9 +192,8 @@ void TSwitchButton::SetLongClickState(bool AInLongClick) {
             FIsOnLongClick = true;
             FBeginLongClickTime = FCurrentMillis; 
         };        
-    } else {
+    } else 
         FIsOnLongClick = false;
-    };
 };
 
 bool TSwitchButton::IsBetweenCalls() {
@@ -225,10 +201,8 @@ bool TSwitchButton::IsBetweenCalls() {
 };
 
 bool TSwitchButton::IsOnDebounceTime(unsigned long &ATimeToCheck, unsigned long &ATimeToClear) {
-    if (ATimeToCheck == 0)
-    { 
+    if (ATimeToCheck == 0) 
         ATimeToCheck = FCurrentMillis;  
-    };
 
     if (FCurrentMillis - ATimeToCheck <= C_MaxDebounceTime) 
     { 
@@ -260,7 +234,9 @@ TSwitchButton::TSwitchButton(int ASwitchId, TSwitchEvent ASwitchEvent, unsigned 
     
 };
 
-void TSwitchButton::Refresh(bool AState, unsigned long ACurrentMillis) {
+
+void TSwitchButton::Refresh(bool AState, unsigned long ACurrentMillis)
+{
     //avoid recursion
     //because it would take processment and during long press would fire more than one 
     //event to the same elapsed time
@@ -274,5 +250,4 @@ void TSwitchButton::Refresh(bool AState, unsigned long ACurrentMillis) {
         else if (AState  &&  FIsClicking)   { Clicking();     }
         else if (!AState && !FIsClicking)   { Idle();         };     
     };
-    
 };
