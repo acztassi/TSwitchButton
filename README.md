@@ -18,11 +18,14 @@ Library for controlling muliple click and long press in Arduino and ESP32
 
 ```
 #include <SwitchButton.h>
-TSwitchButton ButtonTeste(1, ButtonEvent);
+TSwitchButton ButtonTeste(1, ButtonEvent, 5000, true);
 ```
 Arguments:
-- ButtonEvent - Is a pointer to an event which is invoked on each interaction. 
-- "1" - Is the ID of button, used to identify which button is pressed, in case of reuse events for multiple buttons.
+  - "1" - Is the ID of button, used to identify which button is pressed, in case of reuse events for multiple buttons.
+  - "ButtonEvent" - Is a pointer to an event which is invoked on each interaction.
+  - "5000" - Is the max time for long click
+  - "true" - If the event will be fired during long press update or only at the button release.
+
 
 ## How to start?
 It is needed to setup main event! 
@@ -49,8 +52,8 @@ Some methods are avaiables:
   - AtualItem() -- Return the last fired item. It stores the kind of command and the time, in case long click.
   - IsSigleClick() -- Check if it is a single click.
   - IsDoubleClick() -- Check if it is a double click.
-  - IsSinglePress() -- Check if it is a single long click.
-  - IsClickAndPress() -- Check if it is a single click followed by a single long press.
+  - IsLongClick() -- Check if it is a single long click.
+  - IsClickAndLongClick() -- Check if it is a single click followed by a single long press.
 
 
 #### Third Argument: "TSwitchCallback &ACallback"
@@ -65,7 +68,32 @@ void ButtonCallback (int ASwitchId, TSwitchCommands ACommands)
 ```
 In where "int ASwitchId" is the button ID, and the "TSwitchCommands ACommands" is the same as above.
 
-Here a sample of how to use callback use:
+Here some samples of how to use callback use:
+
+```C++
+void ButtonEvent(int ASwitchId, TSwitchCommands ACommands, TSwitchCallback &ACallback)
+{  
+  if (ACommands.IsSigleClick()) 
+  { 
+    Serial.println("click"); 
+    ACallback = [](int ASwitchId, TSwitchCommands ACommands)
+                  { Serial.println("callback finished with click");  };
+  };
+};
+```
+As "ACallback" is defined, if there is no more clicks, this function will be fired after new click limit time.
+
+```C++
+void ButtonEvent(int ASwitchId, TSwitchCommands ACommands, TSwitchCallback &ACallback)
+{  
+  if (ACommands.IsDoubleClick()) 
+  { 
+    Serial.println("hello!! I am a double click"); 
+  };
+  ACallback = nullptr;
+};
+```
+As "ACallback" is undefined, wouldn'd be accepted new commands. For the next command would be nedded to wait the time required between commands.
 
 
 ```C++
@@ -97,7 +125,7 @@ void ButtonEvent(int ASwitchId, TSwitchCommands ACommands, TSwitchCallback &ACal
       [](int ASwitchId, TSwitchCommands ACommands)
       { Serial.println("callback finished on single long press for " + String(ACommands.AtualItem().PressedTime)); };
   }
-  else if (ACommands.IsClickAndPress()) //same of (ACommands.Item(0) == cClick && ACommands.Item(1) == cPress && ACommands.Item(3) == cNone)
+  else if (ACommands.IsClickAndLongClick()) //same of (ACommands.Item(0) == cClick && ACommands.Item(1) == cPress && ACommands.Item(3) == cNone)
   { 
     Serial.println("click + long pressing for " + String(ACommands.AtualItem().PressedTime)); 
     ACallback = ButtonCallback;
@@ -129,6 +157,9 @@ void ButtonEvent(int ASwitchId, TSwitchCommands ACommands, TSwitchCallback &ACal
 
 };
 ```
+Here is an example for full possibilietes.
+
+
 
 ### The second step:
 Make the button work!
