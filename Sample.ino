@@ -23,12 +23,12 @@ void ButtonEvent(int ASwitchId, TSwitchCommands ACommands, TSwitchCallback &ACal
     ACallback = [](int ASwitchId, TSwitchCommands ACommands) { Serial.println("callback finished with dblclick");  };
    // ACallback = nullptr; //does not accept new command ... the command already is executed and does not support another stage
   }
-  else if (ACommands.IsSinglePress())  //same of (ACommands.Item(0) == cPress && ACommands.Item(1) == cNone)
+  else if (ACommands.IsLongClick())  //same of (ACommands.Item(0) == cPress && ACommands.Item(1) == cNone)
   { 
     Serial.println("long pressing for " + String(ACommands.AtualItem().PressedTime)); 
     ACallback = [](int ASwitchId, TSwitchCommands ACommands) { Serial.println("callback finished on single long press for " + String(ACommands.AtualItem().PressedTime));  };
   }
-  else if (ACommands.IsClickAndPress()) //same of (ACommands.Item(0) == cClick && ACommands.Item(1) == cPress && ACommands.Item(3) == cNone)
+  else if (ACommands.IsClickAndLongClick()) //same of (ACommands.Item(0) == cClick && ACommands.Item(1) == cPress && ACommands.Item(3) == cNone)
   { 
     Serial.println("click + long pressing for " + String(ACommands.AtualItem().PressedTime)); 
     ACallback = [](int ASwitchId, TSwitchCommands ACommands) { Serial.println("callback finished on single click + long press for " + String(ACommands.AtualItem().PressedTime));  };
@@ -45,8 +45,8 @@ void ButtonEvent(int ASwitchId, TSwitchCommands ACommands, TSwitchCallback &ACal
         Text = Text + " - Click";
         break;
       
-      case cPress:
-        Text = Text + " - Press(" + String(ACommands[i].PressedTime) + "%)";
+      case cLongClick:
+        Text = Text + " - Press(" + String(ACommands[i].PressedTime) + "ms)";
         break;
       case cNone: 
         break;
@@ -62,7 +62,7 @@ void ButtonEvent(int ASwitchId, TSwitchCommands ACommands, TSwitchCallback &ACal
 
 };
 
-TSwitchButton ButtonTeste(1, ButtonEvent);
+TSwitchButton ButtonTeste(1, ButtonEvent, 5000, true);
 
 int (* Teste)[5];
 int Tes[5] = {1,2,3,4,5};
