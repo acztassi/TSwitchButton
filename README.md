@@ -18,13 +18,31 @@ Library for controlling muliple click and long press in Arduino and ESP32
 
 ```
 #include <SwitchButton.h>
-TSwitchButton ButtonTeste(1, ButtonEvent, 5000, true);
+TSwitchConfig Config(20, 500, 1000, 5000, 2000, false);
+TSwitchButton ButtonTeste(1, ButtonEvent, Config);
 ```
-Arguments:
+
+#### TSwitchButton - Arguments:
   - "1" - Is the ID of button, used to identify which button is pressed, in case of reuse events for multiple buttons.
   - "ButtonEvent" - Is a pointer to an event which is invoked on each interaction.
-  - "5000" - Is the max time for long click
-  - "true" - If the event will be fired during long press update or only at the button release.
+  - "Config" - Is a struct configuration data. It holds all configurations that can be used commonly between many classes. Observe that it is a struct data, not a poiter to a struct, bacause of that, after passed as argument, if you change any value of configuration struct, it will result in nothing. To do that is necessary to delete the TSwitchButton created and create a new one.
+
+#### TSwitchConfig - Arguments:
+
+All arguments already are setted with default values. As following: 
+  1. ADebounceTime = 20,
+  2. AMaxTimeToAcceptClick = 500,
+  3. ATimeBetweenFinishedClicks = 1000,
+  4. ALongClickMaxTime = 5000,
+  5. ATimeOut = 2000,
+  6. AFireEventDuringLongClick = true.
+    
+  - DebounceTime > Time in milliseconds, time of rejection for unwanted interefence.
+  - MaxTimeToAcceptClick > Time in milliseconds, time between button press and release to accept it as single click.
+  - TimeBetweenFinishedClicks > Time in milliseconds, time to reject new operation after an operation is finished.
+  - LongClickMaxTime > Time in milliseconds, time between long click is identified and it's end. After this, the counter stops counting and only release the event after button has been released.
+  - TimeOut > Time in milliseconds, time to cancel the operation. It starts counting from beginin of press. Important: it must be greater than MaxTimeToAcceptClick and TimeBetweenFinishedClicks.
+  - FireEventDuringLongClick > Sets how event will be fired in case of long click. If will be fired each time change (many fires) or fired only at the end (showing the traveled time).
 
 
 ## How to start?
