@@ -86,7 +86,7 @@ void ButtonCallback (int ASwitchId, TSwitchCommands ACommands)
 ```
 In where "int ASwitchId" is the button ID, and the "TSwitchCommands ACommands" is the same as above.
 
-Here some samples of how to use callback use:
+Here some samples of how to use callback:
 
 ```C++
 void ButtonEvent(int ASwitchId, TSwitchCommands ACommands, TSwitchCallback &ACallback)
@@ -101,6 +101,8 @@ void ButtonEvent(int ASwitchId, TSwitchCommands ACommands, TSwitchCallback &ACal
 ```
 As "ACallback" is defined, if there is no more clicks, this function will be fired after new click limit time.
 
+
+A example in where the command already is captured.
 ```C++
 void ButtonEvent(int ASwitchId, TSwitchCommands ACommands, TSwitchCallback &ACallback)
 {  
@@ -114,6 +116,7 @@ void ButtonEvent(int ASwitchId, TSwitchCommands ACommands, TSwitchCallback &ACal
 As "ACallback" is undefined, wouldn'd be accepted new commands. For the next command would be nedded to wait the time required between commands.
 
 
+A full example:
 ```C++
 
 void ButtonCallback (int ASwitchId, TSwitchCommands ACommands)
@@ -123,7 +126,12 @@ void ButtonCallback (int ASwitchId, TSwitchCommands ACommands)
 
 
 void ButtonEvent(int ASwitchId, TSwitchCommands ACommands, TSwitchCallback &ACallback)
-{  
+{
+  if (ASwitchId != 1)
+  {
+    return; /// if I only want this code for button id #1
+  }
+  
   if (ACommands.IsSigleClick()) 
   { 
     Serial.println("click"); 
