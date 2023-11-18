@@ -73,6 +73,11 @@ Some methods are avaiables:
   - IsLongClick() -- Check if it is a single long click.
   - IsClickAndLongClick() -- Check if it is a single click followed by a single long press.
 
+It is possible to create a button by this way:
+```
+TSwitchButton ButtonTest(1, ButtonEvent, TSwitchConfig());
+```
+
 
 #### Third Argument: "TSwitchCallback &ACallback"
 Is an argument to be setted or not for a callback in case of is desired to wait for more commands.
