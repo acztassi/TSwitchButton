@@ -17,10 +17,10 @@
 #include <Arduino.h>
 
 #define C_MaxCommands 20
-#define C_MaxDebounceTime 20
-#define C_MaxTimeToAcceptClick 500
-#define C_MaxTimeOut 3000
-#define C_TimeBetweenCalls 1000
+// #define C_MaxDebounceTime 20
+// #define C_MaxTimeToAcceptClick 500
+// #define C_MaxTimeOut 3000
+// #define C_TimeBetweenCalls 1000
 
 struct TSwitchCommand;
 class TSwitchCommands;
@@ -30,6 +30,22 @@ enum TSwitchEventTime {tDebounce, tAcceptClick, tlongPress, tTimedOut};
 typedef void (*TSwitchCallback)(int ASwitchId, TSwitchCommands ACommands);  //(void*);
 typedef void (*TSwitchEvent)(int ASwitchId, TSwitchCommands ACommands, TSwitchCallback &ACallback);
 
+struct TSwitchConfig{
+  public:
+    TSwitchConfig(unsigned int ADebounceTime = 20, unsigned int AMaxTimeToAcceptClick = 500, unsigned int ATimeBetweenFinishedClicks = 1000, unsigned int ALongClickMaxTime = 5000, unsigned int ATimeOut = 2000, bool AFireEventDuringLongClick = true);
+    //Time in milliseconds, time of rejection for unwanted interefence
+    unsigned int DebounceTime = 20;
+    //Time in milliseconds, time between button press and release to accept it as single click
+    unsigned int MaxTimeToAcceptClick = 500;
+    //Time in milliseconds, time to reject new operation after an operation is finished
+    unsigned int TimeBetweenFinishedClicks = 1000;
+    //Time in milliseconds, time between long click is identified and it's end. After this, the counter stops counting and only release the event after button has been released.
+    unsigned int LongClickMaxTime = 5000;
+    //Time in milliseconds, time to cancel the operation. It starts counting from beginin of press. Important: it must be greater than MaxTimeToAcceptClick and TimeBetweenFinishedClicks
+    unsigned int TimeOut = 2000;
+    //Sets how event will be fired in case of long click. If will be fired each time change (many fires) or fired only at the end (showing the traveled time)
+    bool FireEventDuringLongClick = true;
+};
 
 struct TSwitchCommand{ 
   public:
@@ -65,6 +81,7 @@ class TSwitchButton {
     TSwitchCallback FCallback = nullptr;
     TSwitchEvent FSwitchEvent = nullptr;
     TSwitchCommandsAccess FCommands;  
+    TSwitchConfig FConfig;
     unsigned long FCurrentMillis;   
     unsigned long FBeginClickTime;
     unsigned long FEndClickTime;
@@ -73,8 +90,8 @@ class TSwitchButton {
     unsigned long FTimeLastFinishedCall = 0;
     bool FIsClicking = false;
     bool FIsOnLongClick = false;
-    unsigned long FLongClickMaxTime;    
-    bool FFireEventDuringLongClick;
+    // unsigned long FLongClickMaxTime;    
+    // bool FFireEventDuringLongClick;
 
     void EndCommand(bool AFireProcedure);
     void RunCommand(TSwitchCommandKind ACommand, int AClickingTime) ;
@@ -90,7 +107,7 @@ class TSwitchButton {
     TSwitchEventTime EventTime(unsigned long AElapsedTime, unsigned int ATimeOutLimit);
 
   public: 
-    TSwitchButton(int ASwitchId, TSwitchEvent ASwitchEvent, unsigned long ALongClickMaxTime = 5000, bool AFireEventDuringLongClick = true);
+    TSwitchButton(int ASwitchId, TSwitchEvent ASwitchEvent, TSwitchConfig AConfig);
     void Refresh(bool AState, unsigned long ACurrentMillis);    
 };
 
