@@ -62,17 +62,15 @@ void ButtonEvent(int ASwitchId, TSwitchCommands ACommands, TSwitchCallback &ACal
 
 };
 
-TSwitchButton ButtonTeste(1, ButtonEvent, 5000, true);
 
-int (* Teste)[5];
-int Tes[5] = {1,2,3,4,5};
+TSwitchConfig Config(20, 500, 1000, 5000, 2000, false);
+TSwitchButton ButtonTeste(1, ButtonEvent, Config);
 
 void setup() {
   Serial.begin(115200);
 
   pinMode(LED_BUILTIN, OUTPUT);  
   pinMode(8, INPUT_PULLUP);
-
 }
 
 void loop() {
