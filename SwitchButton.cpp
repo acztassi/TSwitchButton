@@ -13,47 +13,54 @@
 #include "SwitchButton.h"
 #include "Arduino.h"
 
+/* -------------------- IMPLEMENTATION ------------------------- */
+/* -------------------- TSwitchConfig ------------------------ */
+
+TSwitchConfig::TSwitchConfig(unsigned int ADebounceTime, unsigned int AMaxTimeToAcceptClick, unsigned int ATimeBetweenFinishedClicks, unsigned int ALongClickMaxTime, unsigned int ATimeOut, bool AFireEventDuringLongClick)
+: DebounceTime(ADebounceTime), MaxTimeToAcceptClick(AMaxTimeToAcceptClick), TimeBetweenFinishedClicks(ATimeBetweenFinishedClicks), LongClickMaxTime(ALongClickMaxTime), TimeOut(ATimeOut), FireEventDuringLongClick(AFireEventDuringLongClick)
+{
+}
 
 /* -------------------- IMPLEMENTATION ------------------------- */
 /* -------------------- TSwitchCommands ------------------------ */
 
 int TSwitchCommands::Count() {
     return FLastIndex + 1;
-};
+}
 
 TSwitchCommand TSwitchCommands::Item(int AIndex)  {
     if (AIndex >= 0 && AIndex < C_MaxCommands)
         return FCommands[AIndex];    
     else
         return TSwitchCommand();
-};
+}
 
 TSwitchCommand TSwitchCommands::AtualItem() {
     if (FLastIndex < (C_MaxCommands - 1))
         return FCommands[FLastIndex];
     else 
         return TSwitchCommand();
-};
+}
 
 TSwitchCommand TSwitchCommands::operator [](int AIndex)   {
    return Item(AIndex) ;
-};
+}
 
 bool TSwitchCommands::IsSigleClick() {
     return (FCommands[0].Kind == cClick && FCommands[1].Kind == cNone) ;           
-};
+}
 
 bool TSwitchCommands::IsDoubleClick() {
     return (FCommands[0].Kind == cClick && FCommands[1].Kind == cClick && FCommands[2].Kind == cNone) ;
-};
+}
 
 bool TSwitchCommands::IsLongClick() {
     return (FCommands[0].Kind == cLongClick && FCommands[1].Kind == cNone) ;
-};
+}
 
 bool TSwitchCommands::IsClickAndLongClick() {
     return (FCommands[0].Kind == cClick && FCommands[1].Kind == cLongClick && FCommands[2].Kind == cNone) ;
-};
+}
 
 
 /* -------------------- IMPLEMENTATION ------------------------- */
@@ -65,24 +72,24 @@ void TSwitchCommandsAccess::Add(TSwitchCommandKind ACommand, int APressedTime) {
         FLastIndex++;
         FCommands[FLastIndex].Kind = ACommand;
         FCommands[FLastIndex].PressedTime = APressedTime; 
-    };
-};
+    }
+}
 
 void TSwitchCommandsAccess::Clear(){ 
     for (int i = 0; i < C_MaxCommands; i++) 
     { 
         FCommands[i].Kind = cNone; 
         FCommands[i].PressedTime = 0; 
-    };
+    }
     FLastIndex = -1;
-};
+}
 
 void TSwitchCommandsAccess::SetPressedTime(int APressedTime) {
     if (FLastIndex > -1)
     { 
         FCommands[FLastIndex].PressedTime = APressedTime; 
-    };
-};
+    }
+}
 
 /* -------------------- IMPLEMENTATION ------------------------- */
 /* -------------------- class TSwitchButton ------------------------ */
@@ -102,11 +109,11 @@ void TSwitchButton::EndCommand(bool AFireProcedure) {
         FEndClickTime = 0;
         SetLongClickState(false);
         FTimeLastFinishedCall = FCurrentMillis;
-    };    
-};
+    }
+}
 
 void TSwitchButton::RunCommand(TSwitchCommandKind ACommand, int AClickingTime) {
-    if (AClickingTime == 0 || !FFireEventDuringLongClick)     
+    if (AClickingTime == 0 || !FConfig.FireEventDuringLongClick)     
         FCommands.Add(ACommand, AClickingTime); 
     else 
         FCommands.SetPressedTime(AClickingTime);    
@@ -114,16 +121,20 @@ void TSwitchButton::RunCommand(TSwitchCommandKind ACommand, int AClickingTime) {
     this -> FCallback = nullptr;
     this -> FSwitchEvent(FSwitchID, FCommands, FCallback);
     
-    if (!FCallback) //case there is not callback, the command already had finished
-        this -> EndCommand(false); 
-};
+     //case there is not callback, the command already had finished
+     //or in case of commands count has reached the limit, fires the end
+    if (!FCallback)
+        this -> EndCommand(false);
+    else if (FCommands.Count() == C_MaxCommands)
+        this -> EndCommand(true);
+}
 
 void TSwitchButton::BeginClick() {
     if (IsOnDebounceTime(FBeginClickTime, FEndClickTime)) 
         return; 
     FIsClicking = true;
     FEndClickTime = 0;
-};
+}
 
 void TSwitchButton::EndClick() {
     if (IsOnDebounceTime(FEndClickTime, FBeginClickTime)) 
@@ -138,51 +149,51 @@ void TSwitchButton::EndClick() {
     } 
     else 
     {
-        switch (EventTime(FPressedTime, C_MaxTimeOut))
+        switch (EventTime(FPressedTime, FConfig.TimeOut))
         {
             case tDebounce:                              break;
             case tAcceptClick:  RunCommand(cClick, 0);   break;
             case tlongPress:                             break;
             case tTimedOut:     EndCommand(false);       break;
-        };
-    };    
-};
+        }
+    } 
+}
 
 void TSwitchButton::LongClick() {
     SetLongClickState(true);
     //maybe it is setted to only fire long click at end
-    if ((FIsClicking && FFireEventDuringLongClick) || (!FIsClicking && !FFireEventDuringLongClick))
+    if ((FIsClicking && FConfig.FireEventDuringLongClick) || (!FIsClicking && !FConfig.FireEventDuringLongClick))
     {
         //ensure the time won't be greatest of defined
-        int VLongClickTime = min(FCurrentMillis - FBeginLongClickTime, FLongClickMaxTime);
+        int VLongClickTime = min(FCurrentMillis - FBeginLongClickTime, FConfig.LongClickMaxTime);
         RunCommand(cLongClick, VLongClickTime);
-    };
-};
+    }
+}
 
 void TSwitchButton::Clicking() {
     RefreshPressedTime();
-    switch (EventTime(FPressedTime, FLongClickMaxTime))
+    switch (EventTime(FPressedTime, FConfig.LongClickMaxTime))
     {
         case tDebounce:                             break; 
         case tAcceptClick:                          break;
         case tlongPress:       LongClick();         break;
         case tTimedOut:    /*EndCommand(true);*/    break; //disabled to wait button release
-    };
-};
+    }
+}
 
 void TSwitchButton::Idle() {
-    switch (EventTime(FCurrentMillis - FEndClickTime, C_MaxTimeOut))
+    switch (EventTime(FCurrentMillis - FEndClickTime, FConfig.TimeOut))
     {
         case tDebounce:                         break; 
         case tAcceptClick:                      break;
         case tlongPress:    EndCommand(true);   break;
         case tTimedOut:     EndCommand(false);  break;
-    };
-};
+    }
+}
 
 void TSwitchButton::RefreshPressedTime() {
     FPressedTime = FCurrentMillis - FBeginClickTime;
-};
+}
 
 void TSwitchButton::SetLongClickState(bool AInLongClick) {
     if (AInLongClick)
@@ -191,20 +202,20 @@ void TSwitchButton::SetLongClickState(bool AInLongClick) {
         {
             FIsOnLongClick = true;
             FBeginLongClickTime = FCurrentMillis; 
-        };        
+        }       
     } else 
         FIsOnLongClick = false;
-};
+}
 
 bool TSwitchButton::IsBetweenCalls() {
-    return ((FCurrentMillis - FTimeLastFinishedCall ) < C_TimeBetweenCalls);
-};
+    return ((FCurrentMillis - FTimeLastFinishedCall ) < FConfig.TimeBetweenFinishedClicks);
+}
 
 bool TSwitchButton::IsOnDebounceTime(unsigned long &ATimeToCheck, unsigned long &ATimeToClear) {
     if (ATimeToCheck == 0) 
         ATimeToCheck = FCurrentMillis;  
 
-    if (FCurrentMillis - ATimeToCheck <= C_MaxDebounceTime) 
+    if (FCurrentMillis - ATimeToCheck <= FConfig.DebounceTime) 
     { 
         return true; 
     } else {
@@ -212,27 +223,26 @@ bool TSwitchButton::IsOnDebounceTime(unsigned long &ATimeToCheck, unsigned long 
         ATimeToClear = 0;
         ATimeToCheck = FCurrentMillis;
         return false;
-    };
-};
+    }
+}
 
 TSwitchEventTime TSwitchButton::EventTime(unsigned long AElapsedTime, unsigned int ATimeOutLimit) {
-    if      (AElapsedTime <= C_MaxDebounceTime      )   { return tDebounce;     }
-    else if (AElapsedTime <= C_MaxTimeToAcceptClick )   { return tAcceptClick;  }
-    else if (AElapsedTime <= ATimeOutLimit          )   { return tlongPress;    }
-    else                                                { return tTimedOut;     }    
-};
+    if      (AElapsedTime <= FConfig.DebounceTime           )   { return tDebounce;     }
+    else if (AElapsedTime <= FConfig.MaxTimeToAcceptClick   )   { return tAcceptClick;  }
+    else if (AElapsedTime <= ATimeOutLimit                  )   { return tlongPress;    }
+    else                                                        { return tTimedOut;     }    
+}
 
 
 // PUBLIC _______________________________________________________________________________
 
-TSwitchButton::TSwitchButton(int ASwitchId, TSwitchEvent ASwitchEvent, unsigned long ALongClickMaxTime, bool AFireEventDuringLongClick) : 
+TSwitchButton::TSwitchButton(int ASwitchId, TSwitchEvent ASwitchEvent, TSwitchConfig AConfig) : 
     FSwitchID(ASwitchId), 
     FSwitchEvent(ASwitchEvent),
-    FLongClickMaxTime(ALongClickMaxTime),
-    FFireEventDuringLongClick(AFireEventDuringLongClick)  
+    FConfig(AConfig)
 {       
     
-};
+}
 
 
 void TSwitchButton::Refresh(bool AState, unsigned long ACurrentMillis)
@@ -249,5 +259,7 @@ void TSwitchButton::Refresh(bool AState, unsigned long ACurrentMillis)
         else if (!AState &&  FIsClicking)   { EndClick();     }
         else if (AState  &&  FIsClicking)   { Clicking();     }
         else if (!AState && !FIsClicking)   { Idle();         };     
-    };
-};
+    }
+}
+
+
