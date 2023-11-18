@@ -45,9 +45,14 @@ All arguments already are setted with default values (in milliseconds). As follo
   - FireEventDuringLongClick > Sets how event will be fired in case of long click. If will be fired each time change (many fires) or fired only at the end (showing the traveled time).
 
 
+It is possible to create a button by this way:
+```
+TSwitchButton ButtonTest(1, ButtonEvent, TSwitchConfig());
+```
+
+
 ## How to start?
 It is needed to setup main event! 
-
 
 ### The main event
 
@@ -72,12 +77,6 @@ Some methods are avaiables:
   - IsDoubleClick() -- Check if it is a double click.
   - IsLongClick() -- Check if it is a single long click.
   - IsClickAndLongClick() -- Check if it is a single click followed by a single long press.
-
-It is possible to create a button by this way:
-```
-TSwitchButton ButtonTest(1, ButtonEvent, TSwitchConfig());
-```
-
 
 #### Third Argument: "TSwitchCallback &ACallback"
 Is an argument to be setted or not for a callback in case of is desired to wait for more commands.
