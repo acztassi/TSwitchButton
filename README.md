@@ -30,12 +30,12 @@ TSwitchButton ButtonTeste(1, ButtonEvent, Config);
 #### TSwitchConfig - Arguments:
 
 All arguments already are setted with default values. As following: 
-  1. ADebounceTime = 20,
-  2. AMaxTimeToAcceptClick = 500,
-  3. ATimeBetweenFinishedClicks = 1000,
-  4. ALongClickMaxTime = 5000,
-  5. ATimeOut = 2000,
-  6. AFireEventDuringLongClick = true.
+  1. DebounceTime = 20,
+  2. MaxTimeToAcceptClick = 500,
+  3. TimeBetweenFinishedClicks = 1000,
+  4. LongClickMaxTime = 5000,
+  5. TimeOut = 2000,
+  6. FireEventDuringLongClick = true.
     
   - DebounceTime > Time in milliseconds, time of rejection for unwanted interefence.
   - MaxTimeToAcceptClick > Time in milliseconds, time between button press and release to accept it as single click.
