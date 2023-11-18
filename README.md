@@ -29,7 +29,7 @@ TSwitchButton ButtonTeste(1, ButtonEvent, Config);
 
 #### TSwitchConfig - Arguments:
 
-All arguments already are setted with default values. As following: 
+All arguments already are setted with default values (in milliseconds). As following: 
   1. DebounceTime = 20,
   2. MaxTimeToAcceptClick = 500,
   3. TimeBetweenFinishedClicks = 1000,
